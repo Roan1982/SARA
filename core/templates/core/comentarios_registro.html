@@ -1,0 +1,345 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="dashboard-card">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-comments me-2"></i>Comentarios en Registros</h2>
+                <div>
+                    <input type="text" id="busquedaRegistro" class="form-control d-inline-block w-auto me-2" placeholder="Buscar registro...">
+                    <button class="btn btn-outline-primary" onclick="buscarComentarios()">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Estadísticas -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title text-primary">{{ total_comentarios }}</h5>
+                            <p class="card-text">Total comentarios</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title text-success">{{ comentarios_hoy }}</h5>
+                            <p class="card-text">Comentarios hoy</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title text-info">{{ usuarios_activos }}</h5>
+                            <p class="card-text">Usuarios activos</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title text-warning">{{ likes_totales }}</h5>
+                            <p class="card-text">Likes totales</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lista de comentarios recientes -->
+            <div class="mb-4">
+                <h4>Comentarios Recientes</h4>
+                <div id="comentariosContainer">
+                    {% for comentario in comentarios_recientes %}
+                    <div class="card mb-3 comentario-card" data-registro-id="{{ comentario.registro.id }}">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <strong class="me-2">{{ comentario.autor.get_full_name|default:comentario.autor.username }}</strong>
+                                        <small class="text-muted">{{ comentario.fecha|timesince }} atrás</small>
+                                        {% if comentario.comentario_padre %}
+                                        <span class="badge bg-info ms-2">Respuesta</span>
+                                        {% endif %}
+                                    </div>
+                                    <p class="mb-2">{{ comentario.contenido }}</p>
+                                    <div class="d-flex align-items-center">
+                                        <button class="btn btn-sm btn-outline-primary me-2" onclick="darLike({{ comentario.id }})">
+                                            <i class="fas fa-thumbs-up me-1"></i>
+                                            <span id="likes-{{ comentario.id }}">{{ comentario.likes.count }}</span>
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-secondary me-2" onclick="responderComentario({{ comentario.id }})">
+                                            <i class="fas fa-reply me-1"></i>Responder
+                                        </button>
+                                        {% if comentario.autor == user %}
+                                        <button class="btn btn-sm btn-outline-danger" onclick="eliminarComentario({{ comentario.id }})">
+                                            <i class="fas fa-trash me-1"></i>Eliminar
+                                        </button>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="ms-3">
+                                    <small class="text-muted">Registro #{{ comentario.registro.id }}</small>
+                                </div>
+                            </div>
+
+                            <!-- Respuestas -->
+                            {% if comentario.respuestas.exists %}
+                            <div class="mt-3 ms-4 border-start border-primary">
+                                {% for respuesta in comentario.respuestas.all %}
+                                <div class="card mt-2">
+                                    <div class="card-body py-2">
+                                        <div class="d-flex align-items-center mb-1">
+                                            <strong class="me-2">{{ respuesta.autor.get_full_name|default:respuesta.autor.username }}</strong>
+                                            <small class="text-muted">{{ respuesta.fecha|timesince }} atrás</small>
+                                        </div>
+                                        <p class="mb-1 small">{{ respuesta.contenido }}</p>
+                                        <div class="d-flex align-items-center">
+                                            <button class="btn btn-sm btn-outline-primary btn-sm me-2" onclick="darLike({{ respuesta.id }})">
+                                                <i class="fas fa-thumbs-up me-1"></i>
+                                                <span id="likes-{{ respuesta.id }}">{{ respuesta.likes.count }}</span>
+                                            </button>
+                                            {% if respuesta.autor == user %}
+                                            <button class="btn btn-sm btn-outline-danger btn-sm" onclick="eliminarComentario({{ respuesta.id }})">
+                                                <i class="fas fa-trash me-1"></i>
+                                            </button>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+
+                            <!-- Formulario de respuesta (oculto por defecto) -->
+                            <div id="respuesta-form-{{ comentario.id }}" class="mt-3" style="display: none;">
+                                <div class="input-group">
+                                    <textarea class="form-control" id="respuesta-text-{{ comentario.id }}" rows="2" placeholder="Escribe tu respuesta..."></textarea>
+                                    <button class="btn btn-primary" onclick="enviarRespuesta({{ comentario.id }})">
+                                        <i class="fas fa-paper-plane"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="text-center text-muted">
+                        <i class="fas fa-comments fa-3x mb-3"></i>
+                        <p>No hay comentarios recientes</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Comentarios más valorados -->
+            <div class="row">
+                <div class="col-md-6">
+                    <h4>Comentarios Más Valorados</h4>
+                    <div class="list-group">
+                        {% for comentario in comentarios_mas_valorados %}
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between">
+                                <div>
+                                    <strong>{{ comentario.autor.get_full_name|default:comentario.autor.username }}</strong>
+                                    <p class="mb-1">{{ comentario.contenido|truncatechars:100 }}</p>
+                                </div>
+                                <div class="text-end">
+                                    <span class="badge bg-success">{{ comentario.likes.count }} likes</span>
+                                    <br>
+                                    <small class="text-muted">{{ comentario.fecha|date:"d/m/Y" }}</small>
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <p class="text-muted">No hay comentarios valorados aún</p>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <h4>Usuarios Más Activos</h4>
+                    <div class="list-group">
+                        {% for usuario in usuarios_mas_activos %}
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between">
+                                <div>
+                                    <strong>{{ usuario.user.get_full_name|default:usuario.user.username }}</strong>
+                                    <p class="mb-1">{{ usuario.comentarios_count }} comentarios</p>
+                                </div>
+                                <div class="text-end">
+                                    <span class="badge bg-primary">{{ usuario.likes_received }} likes recibidos</span>
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <p class="text-muted">No hay actividad de usuarios aún</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal para agregar comentario -->
+<div class="modal fade" id="comentarioModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Agregar Comentario</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="comentarioForm">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="registroId" class="form-label">ID del Registro</label>
+                        <input type="number" class="form-control" id="registroId" name="registro_id" required>
+                        <div class="form-text">Ingresa el ID del registro al que quieres comentar</div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="contenidoComentario" class="form-label">Comentario</label>
+                        <textarea class="form-control" id="contenidoComentario" name="contenido" rows="4" required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Publicar Comentario</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function buscarComentarios() {
+    const query = document.getElementById('busquedaRegistro').value;
+    if (query) {
+        fetch(`/api/comentarios/buscar/?registro=${query}`)
+        .then(response => response.json())
+        .then(data => {
+            actualizarListaComentarios(data);
+        });
+    }
+}
+
+function actualizarListaComentarios(comentarios) {
+    const container = document.getElementById('comentariosContainer');
+    container.innerHTML = comentarios.map(comentario => `
+        <div class="card mb-3">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div class="flex-grow-1">
+                        <div class="d-flex align-items-center mb-2">
+                            <strong class="me-2">${comentario.autor}</strong>
+                            <small class="text-muted">${comentario.fecha}</small>
+                        </div>
+                        <p class="mb-2">${comentario.contenido}</p>
+                        <div class="d-flex align-items-center">
+                            <button class="btn btn-sm btn-outline-primary me-2" onclick="darLike(${comentario.id})">
+                                <i class="fas fa-thumbs-up me-1"></i>
+                                <span id="likes-${comentario.id}">${comentario.likes_count}</span>
+                            </button>
+                            <button class="btn btn-sm btn-outline-secondary me-2" onclick="responderComentario(${comentario.id})">
+                                <i class="fas fa-reply me-1"></i>Responder
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `).join('');
+}
+
+function darLike(comentarioId) {
+    fetch(`/api/comentarios/${comentarioId}/like/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        const likesElement = document.getElementById(`likes-${comentarioId}`);
+        likesElement.textContent = data.likes_count;
+    });
+}
+
+function responderComentario(comentarioId) {
+    const form = document.getElementById(`respuesta-form-${comentarioId}`);
+    form.style.display = form.style.display === 'none' ? 'block' : 'none';
+}
+
+function enviarRespuesta(comentarioId) {
+    const textarea = document.getElementById(`respuesta-text-${comentarioId}`);
+    const contenido = textarea.value.trim();
+
+    if (!contenido) return;
+
+    fetch('/api/comentarios/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({
+            registro: document.querySelector(`[data-registro-id]`).dataset.registroId,
+            contenido: contenido,
+            comentario_padre: comentarioId
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        textarea.value = '';
+        location.reload();
+    });
+}
+
+function eliminarComentario(comentarioId) {
+    if (confirm('¿Está seguro de eliminar este comentario?')) {
+        fetch(`/api/comentarios/${comentarioId}/`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+        .then(response => {
+            if (response.ok) location.reload();
+        });
+    }
+}
+
+document.getElementById('comentarioForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const formData = new FormData(this);
+
+    fetch('/api/comentarios/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({
+            registro: formData.get('registro_id'),
+            contenido: formData.get('contenido')
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.id) {
+            location.reload();
+        } else {
+            alert('Error al publicar comentario');
+        }
+    });
+});
+</script>
+
+<!-- Botón flotante para agregar comentario -->
+<button class="btn btn-primary position-fixed bottom-0 end-0 m-4 rounded-circle" style="width: 60px; height: 60px;" data-bs-toggle="modal" data-bs-target="#comentarioModal">
+    <i class="fas fa-plus fa-lg"></i>
+</button>
+{% endblock %}

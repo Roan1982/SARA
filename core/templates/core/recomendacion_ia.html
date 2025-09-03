@@ -1,0 +1,17 @@
+{% extends 'core/base.html' %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6">
+    <div class="card mt-5 shadow">
+      <div class="card-body text-center">
+        <h2 class="mb-4">Recomendaciones IA</h2>
+        {% if recomendacion %}
+          <div class="alert alert-info fs-5">{{ recomendacion }}</div>
+        {% else %}
+          <div class="alert alert-warning fs-5">No hay recomendaciones disponibles.</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

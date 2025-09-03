@@ -1,0 +1,1454 @@
+/* SARA - Sistema Administrativo de Registros - Estilos Personalizados */
+
+:root {
+    --primary-color: #0d6efd;
+    --secondary-color: #6c757d;
+    --success-color: #198754;
+    --warning-color: #ffc107;
+    --danger-color: #dc3545;
+    --info-color: #0dcaf0;
+    --light-color: #f8f9fa;
+    --dark-color: #212529;
+}
+
+/* Estilos generales */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+}
+
+/* Navbar personalizada */
+.navbar-brand {
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+/* Cards con efectos */
+.card {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+}
+
+/* Estadísticas rápidas */
+.stats-card {
+    background: linear-gradient(135deg, var(--primary-color), #0056b3);
+    color: white;
+    border-radius: 15px;
+}
+
+.stats-card .card-body {
+    padding: 1.5rem;
+}
+
+.stats-card .stat-number {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.stats-card .stat-label {
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+/* Progreso de nivel */
+.progress-level {
+    height: 8px;
+    border-radius: 4px;
+}
+
+.progress-level .progress-bar {
+    background: linear-gradient(90deg, var(--warning-color), var(--success-color));
+}
+
+/* Actividad reciente */
+.activity-item {
+    border-left: 4px solid var(--primary-color);
+    padding-left: 1rem;
+    margin-bottom: 1rem;
+    background: rgba(255,255,255,0.8);
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+.activity-item.success { border-left-color: var(--success-color); }
+.activity-item.warning { border-left-color: var(--warning-color); }
+.activity-item.info { border-left-color: var(--info-color); }
+.activity-item.danger { border-left-color: var(--danger-color); }
+
+/* Insignias */
+.badge-insignia {
+    font-size: 0.75rem;
+    padding: 0.375rem 0.75rem;
+    border-radius: 20px;
+}
+
+.insignia-card {
+    transition: all 0.3s ease;
+}
+
+.insignia-card:hover {
+    transform: scale(1.05);
+}
+
+.insignia-icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+/* Recomendaciones IA */
+.recommendation-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 15px;
+}
+
+.recommendation-card .card-body {
+    padding: 1.5rem;
+}
+
+/* Tablas responsivas */
+.table-responsive {
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+/* Formularios */
+.form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+.btn-custom {
+    border-radius: 25px;
+    padding: 0.5rem 1.5rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-custom:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
+
+/* Notificaciones */
+.notification-item {
+    border-radius: 10px;
+    margin-bottom: 0.5rem;
+    transition: all 0.2s;
+}
+
+.notification-item:hover {
+    background-color: rgba(0,0,0,0.05);
+}
+
+.notification-item.unread {
+    border-left: 4px solid var(--primary-color);
+    background-color: rgba(13, 110, 253, 0.05);
+}
+
+/* Loading spinner */
+.spinner-border-sm {
+    width: 1rem;
+    height: 1rem;
+}
+
+/* Responsive utilities */
+@media (max-width: 768px) {
+    .navbar-brand {
+        font-size: 1.25rem;
+    }
+
+    .stats-card .stat-number {
+        font-size: 1.5rem;
+    }
+
+    .card-body {
+        padding: 1rem;
+    }
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+/* Tema oscuro (opcional) */
+body.dark-theme {
+    --bs-body-bg: var(--dark-color);
+    --bs-body-color: var(--light-color);
+}
+
+.dark-theme .card {
+    background-color: #2d3748;
+    color: var(--light-color);
+}
+
+.dark-theme .navbar {
+    background-color: #1a202c !important;
+}
+
+/* Estilos para gráficos */
+.chart-container {
+    position: relative;
+    height: 300px;
+    width: 100%;
+}
+
+/* Menú de Usuario Mejorado */
+.user-menu {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+    border-radius: 25px;
+}
+
+.user-menu:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-1px);
+}
+
+.user-avatar {
+    width: 35px;
+    height: 35px;
+}
+
+.avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.avatar-placeholder {
+    width: 35px;
+    height: 35px;
+    font-size: 1rem;
+}
+
+.user-info .user-name {
+    font-size: 0.85rem;
+    line-height: 1.2;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.user-info .user-role {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.status-indicator {
+    width: 8px;
+    height: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Dropdown Mejorado */
+.dropdown-menu {
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    border: none;
+    padding: 0;
+    overflow: hidden;
+    min-width: 280px;
+    z-index: 1050;
+    position: absolute;
+}
+
+/* Dropdown específico del navbar */
+.navbar .dropdown-menu {
+    z-index: 1060;
+    position: absolute;
+}
+
+/* Dropdown del menú de usuario específicamente */
+.navbar .dropdown .dropdown-menu {
+    z-index: 1070;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    left: auto;
+}
+
+/* Dropdown menu end (usado en el navbar) */
+.dropdown-menu-end {
+    z-index: 1070;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    left: auto;
+}
+
+/* Dropdown cuando está abierto */
+.dropdown-menu.show {
+    z-index: 1080;
+    display: block;
+}
+
+/* Dropdown del menú de usuario con máxima prioridad */
+.navbar .dropdown.show .dropdown-menu {
+    z-index: 1090;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    left: auto;
+    transform: none;
+}
+
+/* Asegurar que el dropdown aparezca por encima de elementos comunes */
+.navbar .dropdown-menu {
+    z-index: 1090 !important;
+}
+
+/* Regla específica para el dropdown del menú de usuario */
+.user-menu + .dropdown-menu {
+    z-index: 1100 !important;
+    position: absolute !important;
+    top: 100% !important;
+    right: 0 !important;
+    left: auto !important;
+}
+
+/* Forzar máxima prioridad para el dropdown del navbar */
+.navbar .dropdown-menu.show,
+.navbar .dropdown.show .dropdown-menu {
+    z-index: 9999 !important;
+    position: absolute !important;
+    display: block !important;
+}
+
+/* Contenedor del dropdown */
+.dropdown {
+    position: relative;
+}
+
+/* Mejorar el comportamiento del dropdown en móviles */
+@media (max-width: 991.98px) {
+    .navbar .dropdown-menu {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        min-width: 250px;
+    }
+}
+
+.dropdown-header {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-bottom: 1px solid #dee2e6;
+}
+
+.user-avatar-sm {
+    width: 40px;
+    height: 40px;
+}
+
+.user-avatar-sm img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.avatar-placeholder-sm {
+    width: 40px;
+    height: 40px;
+    font-size: 1rem;
+}
+
+.dropdown-item {
+    padding: 0.75rem 1rem;
+    transition: all 0.2s ease;
+    border-radius: 0;
+}
+
+.dropdown-item:hover {
+    background: rgba(13, 110, 253, 0.1);
+    transform: translateX(5px);
+    color: #0d6efd;
+}
+
+.dropdown-item i {
+    width: 20px;
+    text-align: center;
+}
+
+.dropdown-divider {
+    margin: 0.25rem 0;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive para menú de usuario */
+@media (max-width: 991.98px) {
+    .user-info {
+        display: none !important;
+    }
+
+    .user-menu {
+        padding: 0.5rem 1rem !important;
+    }
+
+    .user-avatar {
+        width: 30px;
+        height: 30px;
+    }
+
+    .avatar-placeholder {
+        width: 30px;
+        height: 30px;
+        font-size: 0.9rem;
+    }
+}
+
+/* Tema oscuro para menú de usuario */
+body.dark-theme .dropdown-header {
+    background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+    color: white;
+}
+
+body.dark-theme .dropdown-item {
+    color: #e2e8f0;
+}
+
+body.dark-theme .dropdown-item:hover {
+    background: rgba(99, 102, 241, 0.2);
+}
+
+/* ===========================================
+   NAVBAR MEJORADO - ESTILOS AVANZADOS
+   =========================================== */
+
+.navbar {
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+    z-index: 1030;
+    position: relative;
+}
+
+.navbar-brand {
+    transition: all 0.3s ease;
+}
+
+.brand-icon {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    padding: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.brand-text .brand-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.brand-text .brand-subtitle {
+    font-size: 0.7rem;
+    line-height: 1;
+}
+
+/* Enlaces del Navbar */
+.nav-link {
+    font-weight: 500;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.nav-link::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.1);
+    transition: left 0.3s ease;
+    z-index: -1;
+}
+
+.nav-link:hover::before {
+    left: 0;
+}
+
+.nav-link:hover {
+    transform: translateY(-1px);
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.hover-lift:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Badges en el Navbar */
+.level-badge, .notification-badge {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.5rem;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+/* Barra de Búsqueda */
+.search-group {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 25px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.search-group:focus-within {
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.4);
+    transform: scale(1.02);
+}
+
+.search-input {
+    background: transparent;
+    border: none;
+    color: white;
+}
+
+.search-input::placeholder {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.search-input:focus {
+    background: transparent;
+    color: white;
+    box-shadow: none;
+}
+
+/* Menú de Usuario */
+.user-menu {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: all 0.3s ease;
+}
+
+.user-menu:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-1px);
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+}
+
+.avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.avatar-placeholder {
+    width: 40px;
+    height: 40px;
+    font-size: 1.2rem;
+}
+
+.user-info .user-name {
+    font-size: 0.9rem;
+    line-height: 1.2;
+}
+
+.user-info .user-role {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-indicator {
+    width: 8px;
+    height: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Dropdown Mejorado */
+.dropdown-menu {
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    border: none;
+    padding: 0;
+    overflow: hidden;
+}
+
+.dropdown-header {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-bottom: 1px solid #dee2e6;
+}
+
+.user-avatar-sm {
+    width: 35px;
+    height: 35px;
+}
+
+.user-avatar-sm img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.avatar-placeholder-sm {
+    width: 35px;
+    height: 35px;
+    font-size: 0.9rem;
+}
+
+.dropdown-item {
+    padding: 0.75rem 1rem;
+    transition: all 0.2s ease;
+    border-radius: 0;
+}
+
+.dropdown-item:hover {
+    background: rgba(13, 110, 253, 0.1);
+    transform: translateX(5px);
+}
+
+.dropdown-item i {
+    width: 20px;
+    text-align: center;
+}
+
+.dropdown-divider {
+    margin: 0.25rem 0;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive */
+@media (max-width: 991.98px) {
+    .navbar-nav {
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .nav-item {
+        margin-bottom: 0.5rem;
+    }
+
+    .nav-link {
+        padding: 0.75rem 1rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .search-group {
+        margin-bottom: 1rem;
+        width: 100%;
+    }
+
+    .user-info {
+        display: none !important;
+    }
+
+    .brand-text .brand-subtitle {
+        display: none;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .nav-text {
+        display: none;
+    }
+
+    .navbar-brand {
+        font-size: 1.1rem;
+    }
+
+    .brand-icon {
+        padding: 6px;
+    }
+
+    .brand-icon i {
+        font-size: 1.5rem;
+    }
+}
+
+/* Tema Oscuro */
+body.dark-theme .navbar {
+    background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-theme .dropdown-header {
+    background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+    color: white;
+}
+
+body.dark-theme .dropdown-item {
+    color: #e2e8f0;
+}
+
+body.dark-theme .dropdown-item:hover {
+    background: rgba(99, 102, 241, 0.2);
+}
+
+/* Animaciones de entrada */
+.navbar-nav .nav-item {
+    animation: slideInFromTop 0.5s ease-out;
+    animation-fill-mode: both;
+}
+
+.navbar-nav .nav-item:nth-child(1) { animation-delay: 0.1s; }
+.navbar-nav .nav-item:nth-child(2) { animation-delay: 0.2s; }
+.navbar-nav .nav-item:nth-child(3) { animation-delay: 0.3s; }
+.navbar-nav .nav-item:nth-child(4) { animation-delay: 0.4s; }
+.navbar-nav .nav-item:nth-child(5) { animation-delay: 0.5s; }
+.navbar-nav .nav-item:nth-child(6) { animation-delay: 0.6s; }
+
+@keyframes slideInFromTop {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ===========================================
+   TEMA OSCURO COMPLETO
+   =========================================== */
+
+body.dark-theme {
+    background-color: #1a202c;
+    color: #e2e8f0;
+}
+
+body.dark-theme .navbar {
+    background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-theme .card {
+    background-color: #2d3748;
+    border-color: #4a5568;
+    color: #e2e8f0;
+}
+
+body.dark-theme .card-header {
+    background-color: #4a5568;
+    border-bottom-color: #718096;
+}
+
+body.dark-theme .table {
+    color: #e2e8f0;
+}
+
+body.dark-theme .table thead th {
+    background-color: #4a5568;
+    border-color: #718096;
+    color: #e2e8f0;
+}
+
+body.dark-theme .table tbody tr {
+    background-color: #2d3748;
+    border-color: #4a5568;
+}
+
+body.dark-theme .table tbody tr:hover {
+    background-color: #4a5568;
+}
+
+body.dark-theme .form-control {
+    background-color: #4a5568;
+    border-color: #718096;
+    color: #e2e8f0;
+}
+
+body.dark-theme .form-control:focus {
+    background-color: #4a5568;
+    border-color: #63b3ed;
+    color: #e2e8f0;
+}
+
+body.dark-theme .btn-outline-primary {
+    color: #63b3ed;
+    border-color: #63b3ed;
+}
+
+body.dark-theme .btn-outline-primary:hover {
+    background-color: #63b3ed;
+    border-color: #63b3ed;
+}
+
+body.dark-theme .dropdown-menu {
+    background-color: #2d3748;
+    border-color: #4a5568;
+}
+
+body.dark-theme .dropdown-item {
+    color: #e2e8f0;
+}
+
+body.dark-theme .dropdown-item:hover {
+    background-color: #4a5568;
+    color: #e2e8f0;
+}
+
+body.dark-theme .modal-content {
+    background-color: #2d3748;
+    color: #e2e8f0;
+}
+
+body.dark-theme .modal-header {
+    border-bottom-color: #4a5568;
+}
+
+body.dark-theme .modal-footer {
+    border-top-color: #4a5568;
+}
+
+body.dark-theme .alert {
+    background-color: #4a5568;
+    border-color: #718096;
+    color: #e2e8f0;
+}
+
+body.dark-theme .badge {
+    background-color: #63b3ed;
+}
+
+body.dark-theme .progress-bar {
+    background-color: #63b3ed;
+}
+
+body.dark-theme .list-group-item {
+    background-color: #2d3748;
+    border-color: #4a5568;
+    color: #e2e8f0;
+}
+
+body.dark-theme .list-group-item:hover {
+    background-color: #4a5568;
+}
+
+/* ===========================================
+   ANIMACIONES ADICIONALES
+   =========================================== */
+
+.animate-fade-in {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+.animate-slide-in {
+    animation: slideInFromLeft 0.5s ease-out;
+}
+
+.animate-bounce-in {
+    animation: bounceIn 0.6s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideInFromLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes bounceIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.3);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.05);
+    }
+    70% {
+        transform: scale(0.9);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* ===========================================
+   UTILIDADES ADICIONALES
+   =========================================== */
+
+.cursor-pointer {
+    cursor: pointer;
+}
+
+.text-gradient {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.shadow-lg-custom {
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.glass-effect {
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.glass-effect-dark {
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* ===========================================
+   RESPONSIVE ENHANCEMENTS
+   =========================================== */
+
+@media (max-width: 1200px) {
+    .navbar-nav .nav-link {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.9rem;
+    }
+
+    .search-group {
+        max-width: 250px;
+    }
+}
+
+@media (max-width: 768px) {
+    .navbar-brand {
+        font-size: 1.25rem;
+    }
+
+    .brand-icon {
+        padding: 6px;
+    }
+
+    .brand-icon i {
+        font-size: 1.2rem;
+    }
+
+    .search-group {
+        max-width: 200px;
+    }
+
+    .user-menu {
+        padding: 0.5rem 0.75rem;
+    }
+
+    .user-avatar {
+        width: 32px;
+        height: 32px;
+    }
+
+    .avatar-placeholder {
+        width: 32px;
+        height: 32px;
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .navbar-toggler {
+        padding: 0.25rem 0.5rem;
+        font-size: 1.25rem;
+    }
+
+    .navbar-brand {
+        font-size: 1.1rem;
+    }
+
+    .search-group {
+        max-width: 150px;
+    }
+
+    .search-input {
+        font-size: 0.9rem;
+    }
+
+    .nav-link {
+        padding: 0.5rem 0.25rem;
+        font-size: 0.85rem;
+    }
+
+    .user-menu {
+        padding: 0.25rem 0.5rem;
+    }
+
+    .user-avatar {
+        width: 28px;
+        height: 28px;
+    }
+
+    .avatar-placeholder {
+        width: 28px;
+        height: 28px;
+        font-size: 0.9rem;
+    }
+}
+
+/* ===========================================
+   TOAST NOTIFICATIONS
+   =========================================== */
+
+.toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 9999;
+}
+
+.toast {
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.toast.success {
+    background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+    color: white;
+}
+
+.toast.error {
+    background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+    color: white;
+}
+
+.toast.warning {
+    background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
+    color: white;
+}
+
+.toast.info {
+    background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+    color: white;
+}
+
+/* ===========================================
+   LOADING STATES
+   =========================================== */
+
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    backdrop-filter: blur(5px);
+}
+
+.loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-top: 4px solid #fff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* ===========================================
+   STICKY FOOTER - Layout Mejorado
+   =========================================== */
+
+html, body {
+    height: 100%;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+main {
+    flex: 1 0 auto;
+}
+
+footer {
+    flex-shrink: 0;
+    margin-top: auto;
+}
+
+/* Footer mejorado */
+footer {
+    background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+}
+
+footer .container {
+    padding: 1rem 0;
+}
+
+footer p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+footer .text-end p {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+/* Tema oscuro para footer */
+body.dark-theme footer {
+    background: linear-gradient(135deg, #1a202c 0%, #0f1419 100%);
+    border-top-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Responsive footer */
+@media (max-width: 768px) {
+    footer .row {
+        text-align: center;
+    }
+
+    footer .col-md-6.text-end {
+        text-align: center !important;
+        margin-top: 0.5rem;
+    }
+}
+
+/* ===========================================
+   CONTENIDO PRINCIPAL - Mejoras
+   =========================================== */
+
+main {
+    background: var(--bs-body-bg);
+    transition: background-color 0.3s ease;
+}
+
+/* Espaciado mínimo para páginas con poco contenido */
+main .container-fluid {
+    min-height: calc(100vh - 200px); /* Altura mínima para asegurar que el footer esté abajo */
+    padding-bottom: 2rem;
+}
+
+/* Para páginas muy cortas, asegurar que haya espacio */
+.page-content {
+    min-height: 60vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ===========================================
+   UTILIDADES PARA LAYOUT
+   =========================================== */
+
+.sticky-footer-page {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.content-wrapper {
+    flex: 1;
+    padding: 2rem 0;
+}
+
+/* Animación suave para el contenido */
+main {
+    animation: fadeInContent 0.3s ease-in-out;
+}
+
+@keyframes fadeInContent {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ===========================================
+   PÁGINAS ESPECÍFICAS - Mejoras
+   =========================================== */
+
+/* Páginas de formularios (login, registro, etc.) - REMOVIDO para evitar conflictos con sticky footer */
+/*
+.form-page .container-fluid {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - 76px - 80px);
+}
+*/
+
+/* Centrado vertical mejorado para formularios */
+.form-page main .container-fluid {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - 76px - 80px); /* Altura navbar + footer */
+    padding: 2rem 0;
+}
+
+.form-page .row.justify-content-center.align-items-center {
+    width: 100%;
+    margin: 0;
+    min-height: 100%;
+}
+
+/* Dashboard y páginas con mucho contenido */
+.dashboard-page .container-fluid {
+    min-height: auto; /* Permitir scroll natural */
+}
+
+/* Páginas de perfil y configuración - REMOVIDO para evitar conflictos */
+/*
+.profile-page .container-fluid {
+    min-height: calc(100vh - 76px - 80px);
+}
+*/
+
+/* Centrado vertical para formularios y contenido corto */
+.content-centered {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 70vh;
+    padding: 2rem 0;
+}
+
+.content-centered .card {
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+/* Altura mínima personalizada */
+.min-vh-70 {
+    min-height: 70vh;
+}
+
+/* Mejoras para formularios */
+.form-page .card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.95);
+    transition: all 0.3s ease;
+}
+
+.form-page .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+.form-page .card-body {
+    padding: 2rem;
+}
+
+.form-page .form-control {
+    border-radius: 10px;
+    border: 2px solid #e9ecef;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-page .form-control:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
+    transform: translateY(-2px);
+}
+
+.form-page .form-select {
+    border-radius: 10px;
+    border: 2px solid #e9ecef;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-page .form-select:focus {
+    border-color: #0d6efd;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.15);
+    transform: translateY(-2px);
+}
+
+.form-page .btn {
+    border-radius: 10px;
+    padding: 0.75rem 2rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.form-page .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Tema oscuro para formularios */
+body.dark-theme .form-page .card {
+    background: rgba(45, 55, 72, 0.95);
+    color: #e2e8f0;
+}
+
+body.dark-theme .form-page .card:hover {
+    background: rgba(45, 55, 72, 0.98);
+}
+
+body.dark-theme .form-page .form-control {
+    background-color: #4a5568;
+    border-color: #718096;
+    color: #e2e8f0;
+}
+
+body.dark-theme .form-page .form-control:focus {
+    border-color: #63b3ed;
+    background-color: #4a5568;
+}
+
+body.dark-theme .form-page .form-select {
+    background-color: #4a5568;
+    border-color: #718096;
+    color: #e2e8f0;
+}
+
+.form-page .form-label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.5rem;
+}
+
+.form-page .card h2 {
+    color: #0d6efd;
+    font-weight: 700;
+    font-size: 1.8rem;
+    margin-bottom: 2rem;
+}
+
+.form-page .alert {
+    border-radius: 10px;
+    border: none;
+    font-weight: 500;
+}
+
+/* Tema oscuro para etiquetas */
+body.dark-theme .form-page .form-label {
+    color: #e2e8f0;
+}
+
+body.dark-theme .form-page .card h2 {
+    color: #63b3ed;
+}
+
+body.dark-theme .form-page .alert {
+    background-color: #4a5568;
+    color: #e2e8f0;
+    border: 1px solid #718096;
+}
+
+/* ===========================================
+   DROPDOWN MEJORADO - Comportamiento Nativo
+   =========================================== */
+
+/* Asegurar que el dropdown del navbar funcione correctamente */
+.navbar .dropdown-toggle {
+    cursor: pointer;
+}
+
+.navbar .dropdown-toggle:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+/* Mejorar la transición del dropdown */
+.navbar .dropdown-menu {
+    transition: all 0.15s ease-in-out;
+    transform: translateY(-10px);
+    opacity: 0;
+    pointer-events: none;
+}
+
+.navbar .dropdown-menu.show {
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* Asegurar que el navbar se vea normal en páginas de formularios */
+.form-page .navbar {
+    position: relative;
+    z-index: 1030;
+}
+
+/* Reset de cualquier transformación que pueda estar afectando el navbar */
+.form-page .navbar,
+.form-page .navbar * {
+    transform: none !important;
+}
+
+/* Estilos para debugging (descomentar si es necesario) */
+/*
+.navbar .dropdown-menu::before {
+    content: "Z-INDEX: " attr(style);
+    position: absolute;
+    top: -20px;
+    left: 0;
+    background: red;
+    color: white;
+    font-size: 10px;
+    padding: 2px 5px;
+    border-radius: 3px;
+    z-index: 10000;
+}
+*/

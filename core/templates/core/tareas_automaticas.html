@@ -1,0 +1,345 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="dashboard-card">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-cogs me-2"></i>Tareas Automáticas</h2>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#nuevaTareaModal">
+                    <i class="fas fa-plus me-2"></i>Nueva Tarea
+                </button>
+            </div>
+
+            <!-- Estadísticas -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title text-primary">{{ tareas_activas|length }}</h5>
+                            <p class="card-text">Tareas activas</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title text-success">{{ tareas_ejecutadas_hoy }}</h5>
+                            <p class="card-text">Ejecutadas hoy</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title text-warning">{{ tareas_pendientes|length }}</h5>
+                            <p class="card-text">Pendientes</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title text-info">{{ tipos_tarea|length }}</h5>
+                            <p class="card-text">Tipos de tarea</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lista de tareas -->
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Tipo</th>
+                            <th>Frecuencia</th>
+                            <th>Próxima ejecución</th>
+                            <th>Última ejecución</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for tarea in tareas %}
+                        <tr>
+                            <td>{{ tarea.nombre }}</td>
+                            <td>
+                                <span class="badge bg-primary">{{ tarea.get_tipo_display }}</span>
+                            </td>
+                            <td>{{ tarea.get_frecuencia_display }}</td>
+                            <td>
+                                {% if tarea.proxima_ejecucion %}
+                                    {{ tarea.proxima_ejecucion|date:"d/m/Y H:i" }}
+                                {% else %}
+                                    <span class="text-muted">No programada</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if tarea.ultima_ejecucion %}
+                                    {{ tarea.ultima_ejecucion|date:"d/m/Y H:i" }}
+                                {% else %}
+                                    <span class="text-muted">Nunca</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if tarea.activa %}
+                                    <span class="badge bg-success">Activa</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Inactiva</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-success" onclick="ejecutarTarea({{ tarea.id }})">
+                                    <i class="fas fa-play"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-primary" onclick="editarTarea({{ tarea.id }})">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-warning" onclick="toggleTarea({{ tarea.id }}, {{ tarea.activa|lower }})">
+                                    {% if tarea.activa %}
+                                        <i class="fas fa-pause"></i>
+                                    {% else %}
+                                        <i class="fas fa-play"></i>
+                                    {% endif %}
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger" onclick="eliminarTarea({{ tarea.id }})">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center text-muted">No hay tareas automáticas configuradas</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Nueva Tarea -->
+<div class="modal fade" id="nuevaTareaModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Nueva Tarea Automática</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="nuevaTareaForm">
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="nombre" class="form-label">Nombre de la Tarea *</label>
+                                <input type="text" class="form-control" id="nombre" name="nombre" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="tipo" class="form-label">Tipo de Tarea *</label>
+                                <select class="form-select" id="tipo" name="tipo" required>
+                                    {% for tipo, nombre in tipos_tarea_opciones %}
+                                    <option value="{{ tipo }}">{{ nombre }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="descripcion" class="form-label">Descripción</label>
+                        <textarea class="form-control" id="descripcion" name="descripcion" rows="3"></textarea>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="frecuencia" class="form-label">Frecuencia *</label>
+                                <select class="form-select" id="frecuencia" name="frecuencia" required onchange="toggleFrecuenciaOptions()">
+                                    {% for freq, nombre in frecuencias_opciones %}
+                                    <option value="{{ freq }}">{{ nombre }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="hora_ejecucion" class="form-label">Hora de Ejecución *</label>
+                                <input type="time" class="form-control" id="hora_ejecucion" name="hora_ejecucion" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3" id="diasEjecucionContainer" style="display: none;">
+                        <label class="form-label">Días de ejecución</label>
+                        <div class="row">
+                            {% for dia in dias_semana %}
+                            <div class="col-md-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="dia_{{ dia.0 }}" name="dias_ejecucion" value="{{ dia.0 }}">
+                                    <label class="form-check-label" for="dia_{{ dia.0 }}">
+                                        {{ dia.1 }}
+                                    </label>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="parametros" class="form-label">Parámetros adicionales (JSON)</label>
+                        <textarea class="form-control" id="parametros" name="parametros" rows="3" placeholder='{"ejemplo": "valor"}'></textarea>
+                        <div class="form-text">Opcional: parámetros específicos para la tarea en formato JSON</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Crear Tarea</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Logs de Ejecución -->
+<div class="modal fade" id="logsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Logs de Ejecución</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="logsContent">
+                    <!-- Los logs se cargarán aquí -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleFrecuenciaOptions() {
+    const frecuencia = document.getElementById('frecuencia').value;
+    const diasContainer = document.getElementById('diasEjecucionContainer');
+
+    if (frecuencia === 'semanal' || frecuencia === 'personalizada') {
+        diasContainer.style.display = 'block';
+    } else {
+        diasContainer.style.display = 'none';
+    }
+}
+
+function ejecutarTarea(id) {
+    if (confirm('¿Está seguro de ejecutar esta tarea ahora?')) {
+        fetch(`/api/tareas-automaticas/${id}/ejecutar/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert('Tarea ejecutada exitosamente');
+            location.reload();
+        })
+        .catch(error => {
+            alert('Error al ejecutar la tarea');
+        });
+    }
+}
+
+function toggleTarea(id, actualmenteActiva) {
+    const accion = actualmenteActiva ? 'desactivar' : 'activar';
+    if (confirm(`¿Está seguro de ${accion} esta tarea?`)) {
+        fetch(`/api/tareas-automaticas/${id}/toggle/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+        .then(response => {
+            if (response.ok) location.reload();
+        });
+    }
+}
+
+function editarTarea(id) {
+    // Implementar edición
+    console.log('Editar tarea:', id);
+}
+
+function eliminarTarea(id) {
+    if (confirm('¿Está seguro de eliminar esta tarea automática?')) {
+        fetch(`/api/tareas-automaticas/${id}/`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+        .then(response => {
+            if (response.ok) location.reload();
+        });
+    }
+}
+
+document.getElementById('nuevaTareaForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const formData = new FormData(this);
+
+    const diasEjecucion = Array.from(document.querySelectorAll('input[name="dias_ejecucion"]:checked'))
+        .map(checkbox => parseInt(checkbox.value));
+
+    let parametros = {};
+    try {
+        const paramText = formData.get('parametros');
+        if (paramText) {
+            parametros = JSON.parse(paramText);
+        }
+    } catch (error) {
+        alert('Error en el formato JSON de parámetros');
+        return;
+    }
+
+    fetch('/api/tareas-automaticas/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({
+            nombre: formData.get('nombre'),
+            tipo: formData.get('tipo'),
+            descripcion: formData.get('descripcion'),
+            frecuencia: formData.get('frecuencia'),
+            hora_ejecucion: formData.get('hora_ejecucion'),
+            dias_ejecucion: diasEjecucion,
+            parametros: parametros
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.id) {
+            location.reload();
+        } else {
+            alert('Error al crear la tarea: ' + JSON.stringify(data));
+        }
+    })
+    .catch(error => {
+        alert('Error de conexión');
+    });
+});
+
+// Inicializar
+document.addEventListener('DOMContentLoaded', function() {
+    toggleFrecuenciaOptions();
+});
+</script>
+{% endblock %}

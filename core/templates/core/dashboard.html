@@ -1,0 +1,309 @@
+{% extends 'core/base.html' %}
+{% block title %}Dashboard - SARA{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Encabezado -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="h3 mb-0">
+                        <i class="fas fa-tachometer-alt text-primary"></i> Dashboard
+                    </h1>
+                    <p class="text-muted mb-0">
+                        Bienvenido de vuelta, {{ user.get_full_name|default:user.username }}
+                        <span class="badge badge-{{ user.rol|lower }}">{{ user.get_rol_display }}</span>
+                    </p>
+                </div>
+                <div class="text-right">
+                    <small class="text-muted d-block">Último acceso</small>
+                    <small>{{ user.ultimo_login|date:"d/m/Y H:i" }}</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estadísticas Rápidas -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Registros Totales
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ estadisticas_rapidas.total_registros }}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-file-alt fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Registros Hoy
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ estadisticas_rapidas.registros_hoy }}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-calendar-day fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Tu Nivel
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ estadisticas_rapidas.nivel_actual }}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-star fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Insignias
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ estadisticas_rapidas.insignias_total }}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-trophy fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Actividad Reciente -->
+        <div class="col-lg-8 mb-4">
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-history"></i> Actividad Reciente
+                    </h6>
+                </div>
+                <div class="card-body">
+                    {% if actividad_reciente %}
+                        <div class="timeline">
+                            {% for actividad in actividad_reciente %}
+                            <div class="timeline-item">
+                                <div class="timeline-marker bg-{{ actividad.color }}"></div>
+                                <div class="timeline-content">
+                                    <h6 class="timeline-title">{{ actividad.titulo }}</h6>
+                                    <p class="timeline-text text-muted mb-1">
+                                        <small>{{ actividad.fecha|date:"d/m/Y H:i" }}</small>
+                                    </p>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-inbox fa-3x text-gray-300 mb-3"></i>
+                            <p class="text-muted">No hay actividad reciente</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel Lateral -->
+        <div class="col-lg-4">
+            <!-- Recomendaciones IA -->
+            {% if recomendaciones %}
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-success">
+                        <i class="fas fa-brain"></i> Recomendaciones IA
+                    </h6>
+                </div>
+                <div class="card-body">
+                    {% for recomendacion in recomendaciones %}
+                    <div class="d-flex align-items-start mb-3">
+                        <div class="mr-3">
+                            <i class="fas fa-lightbulb text-warning fa-lg"></i>
+                        </div>
+                        <div>
+                            <h6 class="font-weight-bold">{{ recomendacion.titulo }}</h6>
+                            <p class="text-muted small mb-0">{{ recomendacion.descripcion }}</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Acciones Rápidas -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-info">
+                        <i class="fas fa-bolt"></i> Acciones Rápidas
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        {% if user.rol == 'operador' %}
+                            <a href="{% url 'registro_form' %}" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Nuevo Registro
+                            </a>
+                            <a href="{% url 'panel_usuario_view' %}" class="btn btn-outline-success">
+                                <i class="fas fa-chart-bar"></i> Mis Estadísticas
+                            </a>
+                        {% elif user.rol == 'lider' or user.rol == 'admin' %}
+                            <a href="{% url 'panel_equipo_view' %}" class="btn btn-primary">
+                                <i class="fas fa-users"></i> Panel de Equipo
+                            </a>
+                        {% endif %}
+
+                        <a href="{% url 'insignias' %}" class="btn btn-outline-warning">
+                            <i class="fas fa-trophy"></i> Mis Insignias
+                        </a>
+
+                        {% if estadisticas_rapidas.notificaciones_no_leidas > 0 %}
+                        <a href="{% url 'notificaciones' %}" class="btn btn-outline-danger">
+                            <i class="fas fa-bell"></i> Notificaciones
+                            <span class="badge badge-danger">{{ estadisticas_rapidas.notificaciones_no_leidas }}</span>
+                        </a>
+                        {% else %}
+                        <a href="{% url 'notificaciones' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-bell"></i> Notificaciones
+                        </a>
+                        {% endif %}
+
+                        <a href="{% url 'perfil' %}" class="btn btn-outline-info">
+                            <i class="fas fa-user"></i> Mi Perfil
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Nivel y Progreso -->
+            <div class="card shadow">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-level-up-alt"></i> Tu Progreso
+                    </h6>
+                </div>
+                <div class="card-body text-center">
+                    <div class="mb-3">
+                        <span class="h2 text-primary font-weight-bold">{{ user.nivel }}</span>
+                        <p class="text-muted mb-0">Nivel Actual</p>
+                    </div>
+
+                    {% if user.nivel < 10 %}
+                    <div class="progress mb-2">
+                        <div class="progress-bar bg-primary" role="progressbar"
+                             style="width: {{ user.puntos_experiencia|add:0 }}%"
+                             aria-valuenow="{{ user.puntos_experiencia }}"
+                             aria-valuemin="0" aria-valuemax="100">
+                        </div>
+                    </div>
+                    <small class="text-muted">
+                        {{ user.puntos_experiencia }} / {{ user.nivel|add:1 }}00 puntos para el siguiente nivel
+                    </small>
+                    {% endif %}
+
+                    <hr>
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <div class="border-right">
+                                <span class="font-weight-bold text-success">{{ user.racha_actual }}</span><br>
+                                <small class="text-muted">Racha</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <span class="font-weight-bold text-info">{{ user.precision_promedio|floatformat:1 }}%</span><br>
+                            <small class="text-muted">Precisión</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.timeline {
+    position: relative;
+    padding-left: 30px;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #e9ecef;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -22px;
+    top: 5px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    box-shadow: 0 0 0 2px #e9ecef;
+}
+
+.timeline-content {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    border-left: 4px solid #007bff;
+}
+
+.timeline-title {
+    margin-bottom: 5px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.border-left-primary { border-left: 4px solid #4e73df !important; }
+.border-left-success { border-left: 4px solid #1cc88a !important; }
+.border-left-info { border-left: 4px solid #36b9cc !important; }
+.border-left-warning { border-left: 4px solid #f6c23e !important; }
+</style>
+{% endblock %}

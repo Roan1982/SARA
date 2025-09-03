@@ -1,0 +1,253 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="dashboard-card">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-file-template me-2"></i>Plantillas de Registro</h2>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#nuevaPlantillaModal">
+                    <i class="fas fa-plus me-2"></i>Nueva Plantilla
+                </button>
+            </div>
+
+            <!-- Estadísticas -->
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title text-primary">{{ plantillas_activas|length }}</h5>
+                            <p class="card-text">Plantillas activas</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title text-success">{{ total_usos }}</h5>
+                            <p class="card-text">Veces utilizadas</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title text-info">{{ tipos_plantilla|length }}</h5>
+                            <p class="card-text">Tipos diferentes</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filtros -->
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <select class="form-select" id="filtroTipo">
+                        <option value="">Todos los tipos</option>
+                        {% for tipo, nombre in tipos_opciones %}
+                        <option value="{{ tipo }}">{{ nombre }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <select class="form-select" id="filtroEstado">
+                        <option value="">Todos los estados</option>
+                        <option value="activa">Activas</option>
+                        <option value="inactiva">Inactivas</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <input type="text" class="form-control" id="busqueda" placeholder="Buscar por nombre...">
+                </div>
+            </div>
+
+            <!-- Lista de plantillas -->
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Tipo</th>
+                            <th>Descripción</th>
+                            <th>Usos</th>
+                            <th>Estado</th>
+                            <th>Creada</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="plantillasTableBody">
+                        {% for plantilla in plantillas %}
+                        <tr>
+                            <td>{{ plantilla.nombre }}</td>
+                            <td>
+                                <span class="badge bg-primary">{{ plantilla.get_tipo_display }}</span>
+                            </td>
+                            <td>{{ plantilla.descripcion|truncatechars:50 }}</td>
+                            <td>{{ plantilla.veces_usada }}</td>
+                            <td>
+                                {% if plantilla.activa %}
+                                    <span class="badge bg-success">Activa</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Inactiva</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ plantilla.fecha_creacion|date:"d/m/Y" }}</td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary" onclick="editarPlantilla({{ plantilla.id }})">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-info" onclick="duplicarPlantilla({{ plantilla.id }})">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger" onclick="eliminarPlantilla({{ plantilla.id }})">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center text-muted">No hay plantillas registradas</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Nueva Plantilla -->
+<div class="modal fade" id="nuevaPlantillaModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Nueva Plantilla</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="nuevaPlantillaForm">
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="nombre" class="form-label">Nombre *</label>
+                                <input type="text" class="form-control" id="nombre" name="nombre" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="tipo" class="form-label">Tipo *</label>
+                                <select class="form-select" id="tipo" name="tipo" required>
+                                    {% for tipo, nombre in tipos_opciones %}
+                                    <option value="{{ tipo }}">{{ nombre }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="descripcion" class="form-label">Descripción</label>
+                        <textarea class="form-control" id="descripcion" name="descripcion" rows="3"></textarea>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Campos Obligatorios</h6>
+                            <div id="camposObligatorios">
+                                <div class="input-group mb-2">
+                                    <input type="text" class="form-control" placeholder="Nombre del campo">
+                                    <button class="btn btn-outline-danger" type="button" onclick="removerCampo(this)">-</button>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-outline-primary btn-sm" onclick="agregarCampo('obligatorios')">+ Agregar Campo</button>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Campos Opcionales</h6>
+                            <div id="camposOpcionales">
+                                <div class="input-group mb-2">
+                                    <input type="text" class="form-control" placeholder="Nombre del campo">
+                                    <button class="btn btn-outline-danger" type="button" onclick="removerCampo(this)">-</button>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-outline-primary btn-sm" onclick="agregarCampo('opcionales')">+ Agregar Campo</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Crear Plantilla</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function agregarCampo(tipo) {
+    const container = document.getElementById(`campos${tipo.charAt(0).toUpperCase() + tipo.slice(1)}`);
+    const div = document.createElement('div');
+    div.className = 'input-group mb-2';
+    div.innerHTML = `
+        <input type="text" class="form-control" placeholder="Nombre del campo">
+        <button class="btn btn-outline-danger" type="button" onclick="removerCampo(this)">-</button>
+    `;
+    container.appendChild(div);
+}
+
+function removerCampo(button) {
+    button.parentElement.remove();
+}
+
+function editarPlantilla(id) {
+    // Implementar edición
+    console.log('Editar plantilla:', id);
+}
+
+function duplicarPlantilla(id) {
+    // Implementar duplicación
+    console.log('Duplicar plantilla:', id);
+}
+
+function eliminarPlantilla(id) {
+    if (confirm('¿Está seguro de eliminar esta plantilla?')) {
+        fetch(`/api/plantillas-registro/${id}/`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+        .then(response => {
+            if (response.ok) location.reload();
+        });
+    }
+}
+
+document.getElementById('nuevaPlantillaForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const formData = new FormData(this);
+
+    const camposObligatorios = Array.from(document.querySelectorAll('#camposObligatorios input'))
+        .map(input => input.value).filter(val => val.trim());
+    const camposOpcionales = Array.from(document.querySelectorAll('#camposOpcionales input'))
+        .map(input => input.value).filter(val => val.trim());
+
+    fetch('/api/plantillas-registro/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({
+            nombre: formData.get('nombre'),
+            tipo: formData.get('tipo'),
+            descripcion: formData.get('descripcion'),
+            campos_requeridos: camposObligatorios,
+            campos_opcionales: camposOpcionales
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        location.reload();
+    });
+});
+</script>
+{% endblock %}

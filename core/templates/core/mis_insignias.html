@@ -1,0 +1,26 @@
+{% extends 'core/base.html' %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-8">
+    <div class="card mt-5 shadow">
+      <div class="card-body">
+        <h2 class="mb-4 text-center">Mis Insignias</h2>
+        {% if insignias %}
+        <div class="row g-3">
+          {% for ins in insignias %}
+          <div class="col-md-4">
+            <div class="border rounded p-3 text-center bg-light">
+              <h5 class="text-success">🏅 {{ ins.nombre }}</h5>
+              <p class="small">{{ ins.descripcion }}</p>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="alert alert-warning text-center">No tenés insignias aún.</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

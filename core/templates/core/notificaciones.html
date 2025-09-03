@@ -1,0 +1,119 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Notificaciones{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-bell"></i> Notificaciones
+                        {% if no_leidas > 0 %}
+                        <span class="badge badge-danger">{{ no_leidas }}</span>
+                        {% endif %}
+                    </h3>
+                </div>
+                <div class="card-body">
+                    {% if notificaciones %}
+                        <div class="list-group">
+                            {% for notif in notificaciones %}
+                            <div class="list-group-item {% if not notif.leida %}list-group-item-primary{% endif %}">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <div class="flex-grow-1">
+                                        <h5 class="mb-1">
+                                            {% if notif.tipo == 'achievement' %}
+                                                <i class="fas fa-trophy text-warning"></i>
+                                            {% elif notif.tipo == 'error' %}
+                                                <i class="fas fa-exclamation-triangle text-danger"></i>
+                                            {% elif notif.tipo == 'success' %}
+                                                <i class="fas fa-check-circle text-success"></i>
+                                            {% elif notif.tipo == 'warning' %}
+                                                <i class="fas fa-exclamation-circle text-warning"></i>
+                                            {% else %}
+                                                <i class="fas fa-info-circle text-info"></i>
+                                            {% endif %}
+                                            {{ notif.titulo }}
+                                        </h5>
+                                        <p class="mb-1">{{ notif.mensaje }}</p>
+                                        <small class="text-muted">
+                                            {{ notif.fecha|date:"d/m/Y H:i" }}
+                                            {% if notif.creada_por and notif.creada_por != user %}
+                                                - Por {{ notif.creada_por.get_full_name|default:notif.creada_por.username }}
+                                            {% endif %}
+                                        </small>
+                                    </div>
+                                    <div class="d-flex flex-column align-items-end">
+                                        {% if notif.url_accion and notif.texto_accion %}
+                                        <a href="{{ notif.url_accion }}" class="btn btn-sm btn-outline-primary mb-2">
+                                            {{ notif.texto_accion }}
+                                        </a>
+                                        {% endif %}
+                                        {% if not notif.leida %}
+                                        <button class="btn btn-sm btn-outline-secondary marcar-leida"
+                                                data-id="{{ notif.id }}">
+                                            Marcar como leída
+                                        </button>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-bell-slash fa-3x text-muted mb-3"></i>
+                            <h4>No tienes notificaciones</h4>
+                            <p class="text-muted">Cuando tengas actividad en el sistema, aparecerá aquí.</p>
+                        </div>
+                    {% endif %}
+                </div>
+                {% if notificaciones %}
+                <div class="card-footer">
+                    <div class="row text-center">
+                        <div class="col-md-4">
+                            <strong>{{ total_notificaciones }}</strong><br>
+                            <small class="text-muted">Total</small>
+                        </div>
+                        <div class="col-md-4">
+                            <strong class="text-primary">{{ no_leidas }}</strong><br>
+                            <small class="text-muted">No leídas</small>
+                        </div>
+                        <div class="col-md-4">
+                            <strong class="text-success">{{ leidas }}</strong><br>
+                            <small class="text-muted">Leídas</small>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+$(document).ready(function() {
+    $('.marcar-leida').click(function() {
+        const button = $(this);
+        const notifId = button.data('id');
+
+        $.post('/notificaciones/', {
+            'notificacion_id': notifId,
+            'accion': 'marcar_leida',
+            'csrfmiddlewaretoken': '{{ csrf_token }}'
+        })
+        .done(function(data) {
+            if (data.success) {
+                button.closest('.list-group-item').removeClass('list-group-item-primary');
+                button.remove();
+                location.reload(); // Recargar para actualizar contadores
+            }
+        })
+        .fail(function() {
+            alert('Error al marcar la notificación como leída.');
+        });
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,191 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Mi Perfil{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- Información del Perfil -->
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-user"></i> Información del Perfil
+                    </h3>
+                </div>
+                <div class="card-body">
+                    {% if mensaje %}
+                    <div class="alert alert-{{ mensaje.tipo }} alert-dismissible fade show" role="alert">
+                        {{ mensaje.texto }}
+                        <button type="button" class="close" data-dismiss="alert">
+                            <span>&times;</span>
+                        </button>
+                    </div>
+                    {% endif %}
+
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="username">Nombre de Usuario</label>
+                                    <input type="text" class="form-control" id="username"
+                                           value="{{ user.username }}" readonly>
+                                    <small class="form-text text-muted">No se puede cambiar</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="rol">Rol</label>
+                                    <input type="text" class="form-control" id="rol"
+                                           value="{{ user.get_rol_display }}" readonly>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="first_name">Nombre</label>
+                                    <input type="text" class="form-control" id="first_name" name="first_name"
+                                           value="{{ user.first_name }}">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="last_name">Apellido</label>
+                                    <input type="text" class="form-control" id="last_name" name="last_name"
+                                           value="{{ user.last_name }}">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="email">Email</label>
+                                    <input type="email" class="form-control" id="email" name="email"
+                                           value="{{ user.email }}">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="telefono">Teléfono</label>
+                                    <input type="text" class="form-control" id="telefono" name="telefono"
+                                           value="{{ user.telefono }}">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="fecha_nacimiento">Fecha de Nacimiento</label>
+                                    <input type="date" class="form-control" id="fecha_nacimiento" name="fecha_nacimiento"
+                                           value="{{ user.fecha_nacimiento|date:'Y-m-d' }}">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="tema_preferido">Tema Preferido</label>
+                                    <select class="form-control" id="tema_preferido" name="tema_preferido">
+                                        <option value="light" {% if user.tema_preferido == 'light' %}selected{% endif %}>Claro</option>
+                                        <option value="dark" {% if user.tema_preferido == 'dark' %}selected{% endif %}>Oscuro</option>
+                                        <option value="auto" {% if user.tema_preferido == 'auto' %}selected{% endif %}>Automático</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="bio">Biografía</label>
+                            <textarea class="form-control" id="bio" name="bio" rows="3"
+                                      placeholder="Cuéntanos un poco sobre ti...">{{ user.bio }}</textarea>
+                        </div>
+
+                        <div class="form-group form-check">
+                            <input type="checkbox" class="form-check-input" id="notificaciones_email"
+                                   name="notificaciones_email" {% if user.notificaciones_email %}checked{% endif %}>
+                            <label class="form-check-label" for="notificaciones_email">
+                                Recibir notificaciones por email
+                            </label>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Guardar Cambios
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Estadísticas y Análisis IA -->
+        <div class="col-md-4">
+            <!-- Estadísticas Rápidas -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-chart-bar"></i> Estadísticas
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <div class="border-right">
+                                <h4 class="text-primary">{{ user.nivel }}</h4>
+                                <small class="text-muted">Nivel</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <h4 class="text-success">{{ user.puntos_experiencia }}</h4>
+                            <small class="text-muted">Puntos</small>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <div class="border-right">
+                                <h4 class="text-info">{{ user.registros_totales }}</h4>
+                                <small class="text-muted">Registros</small>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <h4 class="text-warning">{{ user.precision_promedio|floatformat:1 }}%</h4>
+                            <small class="text-muted">Precisión</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Análisis IA -->
+            {% if analisis_usuario.recomendacion %}
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-brain"></i> Recomendación IA
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-{{ analisis_usuario.recomendacion.tipo }}">
+                        <h6>{{ analisis_usuario.recomendacion.titulo }}</h6>
+                        <p class="mb-0">{{ analisis_usuario.recomendacion.contenido }}</p>
+                    </div>
+
+                    {% if analisis_usuario.sugerencias %}
+                    <h6>Sugerencias de mejora:</h6>
+                    <ul class="list-unstyled">
+                        {% for sugerencia in analisis_usuario.sugerencias %}
+                        <li>
+                            <i class="fas fa-lightbulb text-warning"></i>
+                            {{ sugerencia.descripcion }}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,330 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="dashboard-card">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-chart-bar me-2"></i>Reportes Personalizados</h2>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#nuevoReporteModal">
+                    <i class="fas fa-plus me-2"></i>Nuevo Reporte
+                </button>
+            </div>
+
+            <!-- Estadísticas -->
+            <div class="row mb-4">
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title text-primary">{{ reportes_total|length }}</h5>
+                            <p class="card-text">Total reportes</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title text-success">{{ reportes_publicos|length }}</h5>
+                            <p class="card-text">Reportes públicos</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title text-info">{{ total_ejecuciones }}</h5>
+                            <p class="card-text">Ejecuciones totales</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title text-warning">{{ tipos_reporte|length }}</h5>
+                            <p class="card-text">Tipos de reporte</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lista de reportes -->
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Tipo</th>
+                            <th>Descripción</th>
+                            <th>Creado por</th>
+                            <th>Ejecuciones</th>
+                            <th>Público</th>
+                            <th>Última ejecución</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for reporte in reportes %}
+                        <tr>
+                            <td>{{ reporte.nombre }}</td>
+                            <td>
+                                <span class="badge bg-primary">{{ reporte.get_tipo_display }}</span>
+                            </td>
+                            <td>{{ reporte.descripcion|truncatechars:50 }}</td>
+                            <td>{{ reporte.creado_por.get_full_name|default:reporte.creado_por.username }}</td>
+                            <td>{{ reporte.veces_ejecutado }}</td>
+                            <td>
+                                {% if reporte.publico %}
+                                    <span class="badge bg-success">Sí</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">No</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if reporte.veces_ejecutado > 0 %}
+                                    {{ reporte.fecha_creacion|date:"d/m/Y" }}
+                                {% else %}
+                                    <span class="text-muted">Nunca</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-success" onclick="ejecutarReporte({{ reporte.id }})">
+                                    <i class="fas fa-play"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-primary" onclick="editarReporte({{ reporte.id }})">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-info" onclick="verResultado({{ reporte.id }})">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger" onclick="eliminarReporte({{ reporte.id }})">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="8" class="text-center text-muted">No hay reportes personalizados</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Nuevo Reporte -->
+<div class="modal fade" id="nuevoReporteModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Nuevo Reporte Personalizado</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="nuevoReporteForm">
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="nombre" class="form-label">Nombre del Reporte *</label>
+                                <input type="text" class="form-control" id="nombre" name="nombre" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="tipo" class="form-label">Tipo de Reporte *</label>
+                                <select class="form-select" id="tipo" name="tipo" required>
+                                    {% for tipo, nombre in tipos_reporte_opciones %}
+                                    <option value="{{ tipo }}">{{ nombre }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="descripcion" class="form-label">Descripción</label>
+                        <textarea class="form-control" id="descripcion" name="descripcion" rows="3"></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Campos a incluir</label>
+                        <div id="camposSeleccionados">
+                            {% for campo in campos_disponibles %}
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="campo_{{ campo.0 }}" name="campos_seleccionados" value="{{ campo.0 }}">
+                                <label class="form-check-label" for="campo_{{ campo.0 }}">
+                                    {{ campo.1 }}
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="agrupamiento" class="form-label">Agrupar por</label>
+                                <select class="form-select" id="agrupamiento" name="agrupamiento">
+                                    <option value="">Sin agrupamiento</option>
+                                    <option value="fecha">Fecha</option>
+                                    <option value="usuario">Usuario</option>
+                                    <option value="tipo">Tipo</option>
+                                    <option value="estado">Estado</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="publico" name="publico">
+                                    <label class="form-check-label" for="publico">
+                                        Reporte público
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Crear Reporte</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Resultado Reporte -->
+<div class="modal fade" id="resultadoModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Resultado del Reporte</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="resultadoContent">
+                    <!-- El contenido se cargará dinámicamente -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                <button type="button" class="btn btn-primary" onclick="exportarReporte()">
+                    <i class="fas fa-download me-2"></i>Exportar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function ejecutarReporte(id) {
+    fetch(`/api/reportes-personalizados/${id}/ejecutar/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        mostrarResultado(data);
+    });
+}
+
+function mostrarResultado(data) {
+    const modal = new bootstrap.Modal(document.getElementById('resultadoModal'));
+    const content = document.getElementById('resultadoContent');
+
+    if (data.tipo === 'tabla') {
+        content.innerHTML = generarTabla(data.datos);
+    } else if (data.tipo === 'barras' || data.tipo === 'lineas') {
+        content.innerHTML = '<canvas id="chartCanvas"></canvas>';
+        generarGrafico(data.datos, data.tipo);
+    }
+
+    modal.show();
+}
+
+function generarTabla(datos) {
+    if (!datos || datos.length === 0) return '<p>No hay datos para mostrar</p>';
+
+    let html = '<table class="table table-striped"><thead><tr>';
+    Object.keys(datos[0]).forEach(key => {
+        html += `<th>${key}</th>`;
+    });
+    html += '</tr></thead><tbody>';
+
+    datos.forEach(row => {
+        html += '<tr>';
+        Object.values(row).forEach(value => {
+            html += `<td>${value}</td>`;
+        });
+        html += '</tr>';
+    });
+    html += '</tbody></table>';
+
+    return html;
+}
+
+function generarGrafico(datos, tipo) {
+    // Implementar con Chart.js
+    console.log('Generar gráfico:', tipo, datos);
+}
+
+function editarReporte(id) {
+    // Implementar edición
+    console.log('Editar reporte:', id);
+}
+
+function verResultado(id) {
+    ejecutarReporte(id);
+}
+
+function eliminarReporte(id) {
+    if (confirm('¿Está seguro de eliminar este reporte?')) {
+        fetch(`/api/reportes-personalizados/${id}/`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+        .then(response => {
+            if (response.ok) location.reload();
+        });
+    }
+}
+
+function exportarReporte() {
+    // Implementar exportación
+    console.log('Exportar reporte');
+}
+
+document.getElementById('nuevoReporteForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const formData = new FormData(this);
+
+    const camposSeleccionados = Array.from(document.querySelectorAll('input[name="campos_seleccionados"]:checked'))
+        .map(checkbox => checkbox.value);
+
+    fetch('/api/reportes-personalizados/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({
+            nombre: formData.get('nombre'),
+            tipo: formData.get('tipo'),
+            descripcion: formData.get('descripcion'),
+            campos_seleccionados: camposSeleccionados,
+            agrupamiento: formData.get('agrupamiento'),
+            publico: formData.get('publico') === 'on'
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        location.reload();
+    });
+});
+</script>
+{% endblock %}

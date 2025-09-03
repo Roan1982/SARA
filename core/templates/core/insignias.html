@@ -1,0 +1,162 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Mis Insignias{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Estadísticas de Gamificación -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-star fa-2x mb-2"></i>
+                    <h4>{{ estadisticas_gamificacion.nivel_actual }}</h4>
+                    <small>Nivel Actual</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-trophy fa-2x mb-2"></i>
+                    <h4>{{ estadisticas_gamificacion.insignias_obtenidas }}</h4>
+                    <small>Insignias Obtenidas</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-chart-line fa-2x mb-2"></i>
+                    <h4>{{ estadisticas_gamificacion.porcentaje_completado }}%</h4>
+                    <small>Progreso Total</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white">
+                <div class="card-body text-center">
+                    <i class="fas fa-coins fa-2x mb-2"></i>
+                    <h4>{{ estadisticas_gamificacion.puntos_experiencia }}</h4>
+                    <small>Puntos de Experiencia</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Insignias Obtenidas -->
+    {% if insignias_obtenidas %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-trophy text-warning"></i> Insignias Obtenidas
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% for insignia in insignias_obtenidas %}
+                        <div class="col-md-4 col-lg-3 mb-3">
+                            <div class="card h-100 border-success">
+                                <div class="card-body text-center">
+                                    <div class="mb-3">
+                                        <i class="{{ insignia.icono }} fa-3x" style="color: {{ insignia.color }};"></i>
+                                    </div>
+                                    <h5 class="card-title">{{ insignia.nombre }}</h5>
+                                    <p class="card-text small">{{ insignia.descripcion }}</p>
+                                    <span class="badge badge-success">
+                                        <i class="fas fa-coins"></i> +{{ insignia.puntos_otorgados }} pts
+                                    </span>
+                                </div>
+                                <div class="card-footer bg-success text-white text-center">
+                                    <small>Obtenida el {{ insignia.fecha_creacion|date:"d/m/Y" }}</small>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Insignias Disponibles -->
+    {% if insignias_disponibles %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-lock text-muted"></i> Insignias Disponibles
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% for insignia in insignias_disponibles %}
+                        <div class="col-md-4 col-lg-3 mb-3">
+                            <div class="card h-100 border-secondary">
+                                <div class="card-body text-center">
+                                    <div class="mb-3">
+                                        <i class="{{ insignia.icono }} fa-3x text-muted"></i>
+                                    </div>
+                                    <h5 class="card-title text-muted">{{ insignia.nombre }}</h5>
+                                    <p class="card-text small text-muted">{{ insignia.descripcion }}</p>
+
+                                    <!-- Requisitos -->
+                                    <div class="small mb-2">
+                                        {% if insignia.registros_minimos %}
+                                        <div>📝 {{ insignia.registros_minimos }} registros</div>
+                                        {% endif %}
+                                        {% if insignia.precision_minima %}
+                                        <div>🎯 {{ insignia.precision_minima }}% precisión</div>
+                                        {% endif %}
+                                        {% if insignia.nivel_requerido %}
+                                        <div>⭐ Nivel {{ insignia.nivel_requerido }}</div>
+                                        {% endif %}
+                                    </div>
+
+                                    <!-- Barra de progreso -->
+                                    <div class="progress mb-2" style="height: 8px;">
+                                        <div class="progress-bar bg-warning" role="progressbar"
+                                             style="width: {{ insignia.progreso }}%"
+                                             aria-valuenow="{{ insignia.progreso }}"
+                                             aria-valuemin="0" aria-valuemax="100">
+                                        </div>
+                                    </div>
+                                    <small class="text-muted">{{ insignia.progreso }}% completado</small>
+                                </div>
+                                <div class="card-footer bg-light text-center">
+                                    <small class="text-muted">
+                                        <i class="fas fa-coins"></i> +{{ insignia.puntos_otorgados }} puntos
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Información adicional -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5><i class="fas fa-info-circle"></i> Sistema de Gamificación</h5>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-star text-primary"></i> <strong>Niveles:</strong> Cada 100 puntos de experiencia subes de nivel</li>
+                        <li><i class="fas fa-trophy text-warning"></i> <strong>Insignias:</strong> Recompensas por logros específicos</li>
+                        <li><i class="fas fa-fire text-danger"></i> <strong>Rachas:</strong> Mantén registros consecutivos sin errores</li>
+                        <li><i class="fas fa-coins text-success"></i> <strong>Puntos:</strong> Gana experiencia por cada registro y logro</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
