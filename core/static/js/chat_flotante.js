@@ -78,13 +78,18 @@
         .then(r => r.json())
         .then(data => {
             users = data.users
-                .filter(u => u.username !== 'SARA' && u.username !== 'sara' && u.username !== 'Sara') // Oculta usuarios humanos llamados SARA
+                .filter(u => u.username !== 'SARA' && u.username !== 'sara' && u.username !== 'Sara')
                 .map(u => ({
                     id: u.id,
                     name: u.username === 'sara_bot' ? 'SARA Bot 🤖' : (u.first_name || u.username),
                     username: u.username
                 }));
-            myId = users.find(u => u.username !== 'sara_bot')?.id;
+            // Obtener el id del usuario autenticado si viene en la respuesta
+            if (data.my_id) {
+                myId = data.my_id;
+            } else {
+                myId = users.find(u => u.username !== 'sara_bot')?.id;
+            }
             // Seleccionar el usuario bot por username y guardar su id globalmente
             const botUser = users.find(u => u.username === 'sara_bot');
             window.saraBotId = botUser ? botUser.id : null;
@@ -119,7 +124,7 @@
         messagesDiv.innerHTML = '';
         messages.forEach(m => {
             const msgDiv = document.createElement('div');
-            // Asegura que los mensajes enviados por el usuario actual siempre estén a la derecha y en azul
+            // Mensajes propios a la derecha/azul, los del bot o de otros a la izquierda/gris
             const isMine = String(m.from_id) === String(myId);
             msgDiv.style.marginBottom = '10px';
             msgDiv.style.textAlign = isMine ? 'right' : 'left';

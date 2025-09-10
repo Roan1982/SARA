@@ -1188,7 +1188,7 @@ def chat_users_api(request):
     from .consumers_chat import get_bot_user
     bot_user = get_bot_user()
     users.append({'id': bot_user.id, 'username': 'sara_bot', 'first_name': 'SARA', 'last_name': 'Bot'})
-    return JsonResponse({'users': users})
+    return JsonResponse({'users': users, 'my_id': request.user.id})
 
 @login_required
 def chat_messages_api(request):
