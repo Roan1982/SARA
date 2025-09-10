@@ -138,8 +138,15 @@
     fetch('/api/chat/users/')
         .then(r => r.json())
         .then(data => {
+            // Evitar duplicados de sara_bot
+            const seen = new Set();
             users = data.users
                 .filter(u => u.username !== 'SARA' && u.username !== 'sara' && u.username !== 'Sara')
+                .filter(u => {
+                    if (seen.has(u.username)) return false;
+                    seen.add(u.username);
+                    return true;
+                })
                 .map(u => ({
                     id: u.id,
                     name: u.username === 'sara_bot' ? 'SARA Bot 🤖' : (u.first_name || u.username),
