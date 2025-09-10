@@ -41,7 +41,10 @@
     chatWindow.innerHTML = `
         <div style="background:#007bff;color:white;padding:14px 16px;font-weight:bold;display:flex;align-items:center;justify-content:space-between;">
             <span>Mensajes</span>
-            <button id="sara-chat-close" style="background:none;border:none;color:white;font-size:1.5rem;cursor:pointer;">&times;</button>
+            <div style="display:flex;align-items:center;gap:8px;">
+                <button id="sara-chat-notif-toggle" title="Activar/Desactivar notificaciones" style="background:none;border:none;color:white;font-size:1.2rem;cursor:pointer;">🔔</button>
+                <button id="sara-chat-close" style="background:none;border:none;color:white;font-size:1.5rem;cursor:pointer;">&times;</button>
+            </div>
         </div>
         <div id="sara-chat-users" style="background:#f7f7f7;padding:8px 12px;overflow-x:auto;white-space:nowrap;"></div>
         <div id="sara-chat-messages" style="flex:1;overflow-y:auto;padding:12px;background:#f9f9f9;"></div>
@@ -49,7 +52,65 @@
             <input id="sara-chat-input" type="text" placeholder="Escribe un mensaje..." style="flex:1;padding:8px 10px;border-radius:6px;border:1px solid #ccc;outline:none;" autocomplete="off" />
             <button type="submit" style="background:#007bff;color:white;border:none;border-radius:6px;padding:0 16px;font-weight:bold;">Enviar</button>
         </form>
+    <audio id="sara-chat-sound" src="/static/audio/notification.mp3" preload="auto" style="display:none;"></audio>
     `;
+    // Notificaciones: estado y helpers
+    let notifEnabled = localStorage.getItem('saraChatNotif') !== 'off';
+    const notifBtn = chatWindow.querySelector('#sara-chat-notif-toggle');
+    const chatSound = chatWindow.querySelector('#sara-chat-sound');
+    const chatBtnBadgeId = 'sara-chat-btn-badge';
+
+    function updateNotifIcon() {
+        notifBtn.textContent = notifEnabled ? '🔔' : '🔕';
+        notifBtn.title = notifEnabled ? 'Desactivar notificaciones' : 'Activar notificaciones';
+    }
+    notifBtn.onclick = () => {
+        notifEnabled = !notifEnabled;
+        localStorage.setItem('saraChatNotif', notifEnabled ? 'on' : 'off');
+        updateNotifIcon();
+    };
+    updateNotifIcon();
+
+    function showChatBtnBadge() {
+        let badge = document.getElementById(chatBtnBadgeId);
+        if (!badge) {
+            badge = document.createElement('span');
+            badge.id = chatBtnBadgeId;
+            badge.textContent = '!';
+            badge.style.position = 'fixed';
+            badge.style.background = 'red';
+            badge.style.color = 'white';
+            badge.style.borderRadius = '50%';
+            badge.style.width = '20px';
+            badge.style.height = '20px';
+            badge.style.display = 'flex';
+            badge.style.alignItems = 'center';
+            badge.style.justifyContent = 'center';
+            badge.style.fontWeight = 'bold';
+            badge.style.fontSize = '1rem';
+            badge.style.zIndex = 10001;
+            document.body.appendChild(badge);
+        }
+        // Posicionar el badge respecto al botón flotante
+        const rect = chatBtn.getBoundingClientRect();
+        badge.style.left = (rect.right - 10) + 'px';
+        badge.style.top = (rect.top - 5) + 'px';
+        badge.style.display = 'flex';
+    }
+    function hideChatBtnBadge() {
+        const badge = document.getElementById(chatBtnBadgeId);
+        if (badge) badge.style.display = 'none';
+    }
+
+    // Mostrar/ocultar chat y ocultar badge al abrir (solo una vez)
+    chatBtn.onclick = () => {
+        const wasHidden = chatWindow.style.display === 'none';
+        chatWindow.style.display = wasHidden ? 'flex' : 'none';
+        if (wasHidden) hideChatBtnBadge();
+    };
+    chatWindow.querySelector('#sara-chat-close').onclick = () => {
+        chatWindow.style.display = 'none';
+    };
     document.body.appendChild(chatWindow);
 
     // Mostrar/ocultar chat
@@ -150,7 +211,9 @@
         ws.onmessage = (event) => {
             const data = JSON.parse(event.data);
             // Solo mostrar si es para la conversación activa
-            if (String(data.sender_id) === String(selectedUser) || String(data.recipient_id) === String(selectedUser)) {
+            const isForActive = String(data.sender_id) === String(selectedUser) || String(data.recipient_id) === String(selectedUser);
+            const isMine = String(data.sender_id) === String(myId);
+            if (isForActive) {
                 messages.push({
                     from: users.find(u => u.id == data.sender_id)?.name || 'Desconocido',
                     from_id: data.sender_id,
@@ -161,6 +224,17 @@
                     is_bot: data.is_bot
                 });
                 renderMessages();
+            }
+            // Notificación si el mensaje es para mí y no lo envié yo
+            if (!isMine && notifEnabled && (String(data.recipient_id) === String(myId) || String(data.recipient_id) === String(window.saraBotId))) {
+                // Si el chat está oculto o no es la conversación activa, mostrar badge y sonido
+                if (chatWindow.style.display === 'none' || !isForActive) {
+                    showChatBtnBadge();
+                    if (chatSound) {
+                        chatSound.currentTime = 0;
+                        chatSound.play();
+                    }
+                }
             }
         };
     }
