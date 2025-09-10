@@ -1,3 +1,6 @@
+# Exponer ollama_generate como función de módulo para compatibilidad con consumers_chat.py
+def ollama_generate(prompt, system=None):
+    return recomendador.ollama_generate(prompt, system)
 import pandas as pd
 import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -45,7 +48,7 @@ MICROLECCIONES = {
 
 
 class RecomendadorIA:
-    def __init__(self, ollama_url='http://localhost:11434/api/generate', ollama_model='gemma:3b'):
+    def __init__(self, ollama_url='http://localhost:11434/api/generate', ollama_model='gemma3:4b'):
         self.vectorizer = TfidfVectorizer(stop_words='english', max_features=100)
         self.modelo_entrenado = False
         self.ollama_url = ollama_url

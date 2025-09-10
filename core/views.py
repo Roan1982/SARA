@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .models import Usuario, Registro, Error, Insignia, Metrica, Notificacion, LogAuditoria, SesionTrabajo, ReportePersonalizado, TareaAutomatica, ComentarioRegistro, PlantillaRegistro, IntegracionExterna
+from .models import Usuario, Registro, Error, Insignia, Metrica, Notificacion, LogAuditoria, SesionTrabajo, ReportePersonalizado, TareaAutomatica, ComentarioRegistro, PlantillaRegistro, IntegracionExterna, ChatMessage
 from .serializers import UsuarioSerializer, RegistroSerializer, ErrorSerializer, InsigniaSerializer, MetricaSerializer, SesionTrabajoSerializer, ReportePersonalizadoSerializer, TareaAutomaticaSerializer, ComentarioRegistroSerializer, PlantillaRegistroSerializer, IntegracionExternaSerializer
 from .ia_recomendador import recomendador, analizar_usuario
 from .consumers import send_notification_to_user, send_stats_update_to_user
@@ -1173,3 +1173,51 @@ def integraciones_externas_view(request):
     }
 
     return render(request, 'core/integraciones_externas.html', context)
+
+from django.contrib.auth import get_user_model
+from django.http import JsonResponse
+from .models import ChatMessage
+from django.db import models
+from django.contrib.auth.decorators import login_required
+
+@login_required
+def chat_users_api(request):
+    User = get_user_model()
+    users = list(User.objects.values('id', 'username', 'first_name', 'last_name'))
+    # Obtener el usuario bot real
+    from .consumers_chat import get_bot_user
+    bot_user = get_bot_user()
+    users.append({'id': bot_user.id, 'username': 'sara_bot', 'first_name': 'SARA', 'last_name': 'Bot'})
+    return JsonResponse({'users': users})
+
+@login_required
+def chat_messages_api(request):
+    user_id = request.user.id
+    other_id = request.GET.get('other_id')
+    if other_id is None:
+        return JsonResponse({'messages': []})
+    from .consumers_chat import get_bot_user
+    bot_user = get_bot_user()
+    bot_id = str(bot_user.id)
+    if str(other_id) == bot_id:
+        # Mensajes con el bot
+        messages = ChatMessage.objects.filter(
+            (models.Q(sender_id=user_id, recipient_id=bot_id) | models.Q(sender_id=bot_id, recipient_id=user_id))
+        ).order_by('timestamp')
+    else:
+        messages = ChatMessage.objects.filter(
+            (models.Q(sender_id=user_id, recipient_id=other_id) | models.Q(sender_id=other_id, recipient_id=user_id))
+        ).order_by('timestamp')
+    data = [
+        {
+            'from': m.sender.username if m.sender else 'SARA Bot',
+            'from_id': m.sender.id if m.sender else 0,
+            'to': m.recipient.username if m.recipient else 'SARA Bot',
+            'to_id': m.recipient.id if m.recipient else 0,
+            'text': m.text,
+            'timestamp': m.timestamp.isoformat(),
+            'is_bot': m.is_bot
+        }
+        for m in messages
+    ]
+    return JsonResponse({'messages': data})

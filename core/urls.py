@@ -14,7 +14,8 @@ from .views import (
     sesiones_trabajo_view, reportes_personalizados_view, tareas_automaticas_view, plantillas_registro_view,
     comentarios_registro_view, integraciones_externas_view,
     user_level_api, notifications_count_api, mark_notification_read_api,
-    notificacion_prueba
+    notificacion_prueba,
+    chat_users_api, chat_messages_api
 )
 
 router = DefaultRouter()
@@ -61,5 +62,7 @@ urlpatterns = [
     path('user/level/', user_level_api, name='user_level_api'),
     path('notifications/count/', notifications_count_api, name='notifications_count_api'),
     path('notifications/<int:notification_id>/read/', mark_notification_read_api, name='mark_notification_read_api'),
+    path('chat/users/', chat_users_api, name='chat_users_api'),
+    path('chat/messages/', chat_messages_api, name='chat_messages_api'),
     path('', include(router.urls)),
 ]

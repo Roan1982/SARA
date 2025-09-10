@@ -66,12 +66,33 @@
     const form = chatWindow.querySelector('#sara-chat-form');
     const input = chatWindow.querySelector('#sara-chat-input');
 
-    // Placeholder: usuarios (el bot y el usuario actual)
-    let users = [
-        {id: 'bot', name: 'SARA Bot 🤖'},
-        {id: 'me', name: 'Tú'}
-    ];
-    let selectedUser = 'bot';
+    // Estado global
+    let users = [];
+    let selectedUser = null;
+    let messages = [];
+    let myId = null;
+    let ws = null;
+
+    // Cargar usuarios desde backend
+    fetch('/api/chat/users/')
+        .then(r => r.json())
+        .then(data => {
+            users = data.users
+                .filter(u => u.username !== 'SARA' && u.username !== 'sara' && u.username !== 'Sara') // Oculta usuarios humanos llamados SARA
+                .map(u => ({
+                    id: u.id,
+                    name: u.username === 'sara_bot' ? 'SARA Bot 🤖' : (u.first_name || u.username),
+                    username: u.username
+                }));
+            myId = users.find(u => u.username !== 'sara_bot')?.id;
+            // Seleccionar el usuario bot por username y guardar su id globalmente
+            const botUser = users.find(u => u.username === 'sara_bot');
+            window.saraBotId = botUser ? botUser.id : null;
+            selectedUser = botUser ? botUser.id : users[0].id;
+            renderUsers();
+            loadMessages();
+            connectWS();
+        });
 
     function renderUsers() {
         usersDiv.innerHTML = '';
@@ -88,46 +109,75 @@
             btn.onclick = () => {
                 selectedUser = u.id;
                 renderUsers();
-                renderMessages();
+                loadMessages();
             };
             usersDiv.appendChild(btn);
         });
     }
 
-    // Placeholder: mensajes
-    let messages = [
-        {from: 'bot', to: 'me', text: '¡Hola! Soy SARA Bot. ¿En qué puedo ayudarte?', timestamp: Date.now()}
-    ];
-
     function renderMessages() {
         messagesDiv.innerHTML = '';
-        messages.filter(m => (m.from === selectedUser || m.to === selectedUser)).forEach(m => {
+        messages.forEach(m => {
             const msgDiv = document.createElement('div');
+            // Asegura que los mensajes enviados por el usuario actual siempre estén a la derecha y en azul
+            const isMine = String(m.from_id) === String(myId);
             msgDiv.style.marginBottom = '10px';
-            msgDiv.style.textAlign = m.from === 'me' ? 'right' : 'left';
-            msgDiv.innerHTML = `<span style="display:inline-block;padding:8px 12px;border-radius:8px;background:${m.from === 'me' ? '#007bff' : '#e0e0e0'};color:${m.from === 'me' ? 'white' : '#222'};max-width:80%;word-break:break-word;">${m.text}</span>`;
+            msgDiv.style.textAlign = isMine ? 'right' : 'left';
+            msgDiv.innerHTML = `<span style="display:inline-block;padding:8px 12px;border-radius:8px;background:${isMine ? '#007bff' : '#e0e0e0'};color:${isMine ? 'white' : '#222'};max-width:80%;word-break:break-word;">${m.text}</span>`;
             messagesDiv.appendChild(msgDiv);
         });
         messagesDiv.scrollTop = messagesDiv.scrollHeight;
     }
 
+    function loadMessages() {
+        if (!selectedUser) return;
+        fetch(`/api/chat/messages/?other_id=${selectedUser}`)
+            .then(r => r.json())
+            .then(data => {
+                messages = data.messages;
+                renderMessages();
+            });
+    }
+
+    function connectWS() {
+        if (ws) ws.close();
+        ws = new WebSocket(`ws://${window.location.host}/ws/chat/`);
+        ws.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            // Solo mostrar si es para la conversación activa
+            if (String(data.sender_id) === String(selectedUser) || String(data.recipient_id) === String(selectedUser)) {
+                messages.push({
+                    from: users.find(u => u.id == data.sender_id)?.name || 'Desconocido',
+                    from_id: data.sender_id,
+                    to: users.find(u => u.id == data.recipient_id)?.name || '',
+                    to_id: data.recipient_id,
+                    text: data.text,
+                    timestamp: Date.now(),
+                    is_bot: data.is_bot
+                });
+                renderMessages();
+            }
+        };
+    }
+
     form.onsubmit = (e) => {
         e.preventDefault();
         const text = input.value.trim();
-        if (!text) return;
-        messages.push({from: 'me', to: selectedUser, text, timestamp: Date.now()});
-        input.value = '';
+        if (!text || !selectedUser) return;
+        // Mostrar el mensaje propio inmediatamente (opcional, pero recargamos después)
+        messages.push({
+            from: users.find(u => u.id == myId)?.name || 'Yo',
+            from_id: myId,
+            to: users.find(u => u.id == selectedUser)?.name || '',
+            to_id: selectedUser,
+            text: text,
+            timestamp: Date.now(),
+            is_bot: false
+        });
         renderMessages();
-        // Si es al bot, simular respuesta (luego se conectará a backend)
-        if (selectedUser === 'bot') {
-            setTimeout(() => {
-                messages.push({from: 'bot', to: 'me', text: 'Procesando tu consulta...', timestamp: Date.now()});
-                renderMessages();
-                // Aquí se llamará al backend para obtener respuesta real
-            }, 800);
-        }
+        ws.send(JSON.stringify({recipient_id: selectedUser, text}));
+        input.value = '';
+        // Recargar mensajes del backend tras un pequeño delay para asegurar persistencia
+        setTimeout(loadMessages, 400);
     };
-
-    renderUsers();
-    renderMessages();
 })();
