@@ -183,6 +183,8 @@
                 selectedUser = u.id;
                 renderUsers();
                 loadMessages();
+                // Ocultar notificación visual al abrir cualquier conversación
+                hideChatBtnBadge();
             };
             usersDiv.appendChild(btn);
         });
@@ -199,7 +201,8 @@
             msgDiv.innerHTML = `<span style="display:inline-block;padding:8px 12px;border-radius:8px;background:${isMine ? '#007bff' : '#e0e0e0'};color:${isMine ? 'white' : '#222'};max-width:80%;word-break:break-word;">${m.text}</span>`;
             messagesDiv.appendChild(msgDiv);
         });
-        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        // Siempre scrollear al final
+        setTimeout(() => { messagesDiv.scrollTop = messagesDiv.scrollHeight; }, 50);
     }
 
     function loadMessages() {
@@ -209,6 +212,8 @@
             .then(data => {
                 messages = data.messages;
                 renderMessages();
+                // Forzar scroll al final después de cargar mensajes
+                setTimeout(() => { messagesDiv.scrollTop = messagesDiv.scrollHeight; }, 100);
             });
     }
 
