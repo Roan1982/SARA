@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import RegexValidator, EmailValidator
 from django.utils import timezone
+from django.conf import settings
 import uuid
 
 class Usuario(AbstractUser):
@@ -704,4 +705,18 @@ class IntegracionExterna(models.Model):
     class Meta:
         verbose_name = 'Integración Externa'
         verbose_name_plural = 'Integraciones Externas'
+
+
+class ChatMessage(models.Model):
+    sender = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='sent_messages', on_delete=models.CASCADE)
+    recipient = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='received_messages', on_delete=models.CASCADE)
+    text = models.TextField()
+    timestamp = models.DateTimeField(default=timezone.now)
+    is_bot = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ['timestamp']
+
+    def __str__(self):
+        return f"{self.sender} -> {self.recipient}: {self.text[:30]}"
 
