@@ -13,6 +13,27 @@ from rest_framework.response import Response
 from .models import Usuario, Registro, Error, Insignia, Metrica, Notificacion, LogAuditoria, SesionTrabajo, ReportePersonalizado, TareaAutomatica, ComentarioRegistro, PlantillaRegistro, IntegracionExterna
 from .serializers import UsuarioSerializer, RegistroSerializer, ErrorSerializer, InsigniaSerializer, MetricaSerializer, SesionTrabajoSerializer, ReportePersonalizadoSerializer, TareaAutomaticaSerializer, ComentarioRegistroSerializer, PlantillaRegistroSerializer, IntegracionExternaSerializer
 from .ia_recomendador import recomendador, analizar_usuario
+from .consumers import send_notification_to_user, send_stats_update_to_user
+# --- VISTA PARA NOTIFICACIÓN DE PRUEBA ---
+from django.views.decorators.http import require_GET
+@login_required
+@require_GET
+def notificacion_prueba(request):
+    """Vista para enviar una notificación de prueba al usuario autenticado"""
+    from asgiref.sync import async_to_sync
+    from django.utils import timezone
+    notification_data = {
+        'id': None,
+        'titulo': 'Notificación de prueba',
+        'mensaje': '¡Esta es una notificación de prueba enviada vía WebSocket!',
+        'tipo': 'info',
+        'fecha': timezone.now().isoformat(),
+        'leida': False,
+        'url_accion': '',
+        'texto_accion': '',
+    }
+    async_to_sync(send_notification_to_user)(str(request.user.id), notification_data)
+    return JsonResponse({'success': True, 'msg': 'Notificación de prueba enviada'})
 import json
 
 class LoginForm(forms.Form):
@@ -129,6 +150,31 @@ def registro_form(request):
                             url_accion='/mis_insignias/',
                             texto_accion='Ver Insignias'
                         )
+
+                        # Enviar notificación en tiempo real
+                        import asyncio
+                        from asgiref.sync import async_to_sync
+
+                        notification_data = {
+                            'id': None,  # Se asignará automáticamente
+                            'titulo': '¡Nueva Insignia!',
+                            'mensaje': f'¡Felicitaciones! Has obtenido la insignia "{insignia.nombre}"',
+                            'tipo': 'achievement',
+                            'fecha': timezone.now().isoformat(),
+                            'leida': False,
+                            'url_accion': '/mis_insignias/',
+                            'texto_accion': 'Ver Insignias',
+                        }
+
+                        async_to_sync(send_notification_to_user)(str(request.user.id), notification_data)
+
+                        # Enviar actualización de estadísticas
+                        stats_data = {
+                            'nivel': request.user.nivel,
+                            'puntos_experiencia': request.user.puntos_experiencia,
+                            'insignias_total': request.user.insignias.count(),
+                        }
+                        async_to_sync(send_stats_update_to_user)(str(request.user.id), stats_data)
 
                 # Registrar en log de auditoría
                 LogAuditoria.objects.create(
@@ -403,6 +449,65 @@ def panel_equipo(request):
 
 def validar_registro(request):
     return JsonResponse({'validado': True})
+
+@api_view(['GET'])
+def user_level_api(request):
+    """API para obtener el nivel del usuario actual"""
+    if not request.user.is_authenticated:
+        return Response({'error': 'Usuario no autenticado'}, status=401)
+
+    return Response({
+        'nivel': request.user.nivel,
+        'puntos_experiencia': request.user.puntos_experiencia,
+        'puntos_totales': request.user.puntos_totales,
+        'racha_actual': request.user.racha_actual,
+        'insignias_total': request.user.insignias.count(),
+    })
+
+@api_view(['GET'])
+def notifications_count_api(request):
+    """API para obtener el conteo de notificaciones no leídas"""
+    if not request.user.is_authenticated:
+        return Response({'error': 'Usuario no autenticado'}, status=401)
+
+    count = Notificacion.objects.filter(
+        usuario=request.user,
+        leida=False
+    ).count()
+
+    return Response({
+        'unread_count': count,
+        'total_notifications': Notificacion.objects.filter(usuario=request.user).count(),
+    })
+
+@api_view(['POST'])
+def mark_notification_read_api(request, notification_id):
+    """API para marcar una notificación como leída"""
+    if not request.user.is_authenticated:
+        return Response({'error': 'Usuario no autenticado'}, status=401)
+
+    try:
+        notification = Notificacion.objects.get(
+            id=notification_id,
+            usuario=request.user
+        )
+        notification.marcar_leida()
+
+        # Enviar actualización en tiempo real
+        from asgiref.sync import async_to_sync
+        from .consumers import send_stats_update_to_user
+
+        stats_data = {
+            'unread_notifications': Notificacion.objects.filter(
+                usuario=request.user,
+                leida=False
+            ).count(),
+        }
+        async_to_sync(send_stats_update_to_user)(str(request.user.id), stats_data)
+
+        return Response({'success': True})
+    except Notificacion.DoesNotExist:
+        return Response({'error': 'Notificación no encontrada'}, status=404)
 
 class UsuarioViewSet(viewsets.ModelViewSet):
     queryset = Usuario.objects.all()

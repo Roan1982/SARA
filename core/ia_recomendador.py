@@ -5,6 +5,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.cluster import KMeans
 from collections import Counter
 from .models import Error, Usuario, Registro, Metrica
+import requests
 import re
 from datetime import datetime, timedelta
 
@@ -42,10 +43,30 @@ MICROLECCIONES = {
     }
 }
 
+
 class RecomendadorIA:
-    def __init__(self):
+    def __init__(self, ollama_url='http://localhost:11434/api/generate', ollama_model='gemma:3b'):
         self.vectorizer = TfidfVectorizer(stop_words='english', max_features=100)
         self.modelo_entrenado = False
+        self.ollama_url = ollama_url
+        self.ollama_model = ollama_model
+
+    def ollama_generate(self, prompt, system=None):
+        """Consulta a Ollama local para obtener una respuesta LLM"""
+        payload = {
+            "model": self.ollama_model,
+            "prompt": prompt,
+            "stream": False
+        }
+        if system:
+            payload["system"] = system
+        try:
+            response = requests.post(self.ollama_url, json=payload, timeout=20)
+            response.raise_for_status()
+            data = response.json()
+            return data.get("response", "")
+        except Exception as e:
+            return f"[Ollama error: {e}]"
 
     def analizar_patron_errores(self, usuario_id):
         """Analiza patrones de error del usuario usando machine learning"""
@@ -192,39 +213,52 @@ class RecomendadorIA:
         return round(precision, 2)
 
     def sugerir_mejoras(self, usuario_id):
-        """Sugiere mejoras específicas para el usuario"""
+        """Sugiere mejoras específicas para el usuario, usando Ollama para feedback avanzado"""
         usuario = Usuario.objects.get(id=usuario_id)
         precision = self.calcular_precision_usuario(usuario_id)
+        analisis = self.analizar_patron_errores(usuario_id)
+
+        # Prompt para Ollama
+        prompt = (
+            f"Usuario: {usuario.username}\n"
+            f"Precisión: {precision}\n"
+            f"Racha actual: {usuario.racha_actual}\n"
+            f"Errores principales: {analisis}\n"
+            "Sugiere 2-3 recomendaciones personalizadas para mejorar la calidad de los registros, en español, breves y prácticas."
+        )
+        respuesta_llm = self.ollama_generate(prompt)
 
         sugerencias = []
+        if respuesta_llm:
+            sugerencias.append({
+                'tipo': 'ollama',
+                'titulo': 'Sugerencias IA',
+                'descripcion': respuesta_llm.strip()
+            })
 
+        # Sugerencias clásicas (fallback)
         if precision < 70:
             sugerencias.append({
                 'tipo': 'capacitacion',
                 'titulo': 'Capacitación Recomendada',
                 'descripcion': 'Tu precisión actual es baja. Te recomendamos completar el módulo de validación de datos.'
             })
-
-        # Análisis de patrones de error
-        analisis = self.analizar_patron_errores(usuario_id)
         if analisis and analisis['total_errores'] > 10:
             sugerencias.append({
                 'tipo': 'practica',
                 'titulo': 'Práctica Específica',
                 'descripcion': f'Enfócate en mejorar la validación del campo "{analisis["campo_principal"]}".'
             })
-
-        # Verificar racha actual
         if usuario.racha_actual < 5:
             sugerencias.append({
                 'tipo': 'motivacion',
                 'titulo': 'Mantén la Racha',
                 'descripcion': '¡Estás cerca de conseguir una insignia! Sigue registrando datos sin errores.'
             })
-
         return sugerencias
 
-# Instancia global del recomendador
+
+# Instancia global del recomendador (con soporte Ollama)
 recomendador = RecomendadorIA()
 
 def recomendar_microleccion(usuario_id):

@@ -192,6 +192,18 @@
         </div>
     </nav>
 
+    <!-- Real-time Notifications Container -->
+    <div id="notification-container" class="position-fixed top-0 end-0 p-3" style="z-index: 1050;">
+        <!-- Notifications will be inserted here dynamically -->
+    </div>
+
+    <!-- WebSocket Connection Status -->
+    <div id="websocket-status" class="position-fixed bottom-0 end-0 p-2" style="z-index: 1040;">
+        <small class="badge bg-secondary" id="ws-status-indicator">
+            <i class="fas fa-circle text-muted me-1"></i>Desconectado
+        </small>
+    </div>
+
     <!-- Main Content -->
     <main class="flex-grow-1">
         <div class="container-fluid py-4">
@@ -234,6 +246,20 @@
     <!-- Custom JS -->
     <script src="{% static 'js/main.js' %}"></script>
     <script src="{% static 'js/utils.js' %}"></script>
+
+    <!-- Real-time Notifications -->
+    <script src="{% static 'js/notifications.js' %}"></script>
+    <script>
+        // Initialize notifications when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof NotificationManager !== 'undefined') {
+                window.notificationManager = new NotificationManager({{ user.id }});
+            }
+        });
+    </script>
+
+    <!-- Hidden user ID for JavaScript -->
+    <input type="hidden" id="current-user-id" value="{{ user.id }}">
 
     {% block extra_js %}{% endblock %}
 </body>

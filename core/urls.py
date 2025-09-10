@@ -12,7 +12,9 @@ from .views import (
     panel_usuario, panel_equipo, validar_registro,
     notificaciones_view, insignias_view, perfil_usuario_view,
     sesiones_trabajo_view, reportes_personalizados_view, tareas_automaticas_view, plantillas_registro_view,
-    comentarios_registro_view, integraciones_externas_view
+    comentarios_registro_view, integraciones_externas_view,
+    user_level_api, notifications_count_api, mark_notification_read_api,
+    notificacion_prueba
 )
 
 router = DefaultRouter()
@@ -29,6 +31,7 @@ router.register(r'plantillas-registro', PlantillaRegistroViewSet)
 router.register(r'integraciones-externas', IntegracionExternaViewSet)
 
 urlpatterns = [
+    path('notificacion_prueba/', notificacion_prueba, name='notificacion_prueba'),
     path('mis_insignias/', mis_insignias, name='mis_insignias'),
     path('registro_usuario/', registro_usuario, name='registro_usuario'),
     path('login/', login_view, name='login'),
@@ -55,5 +58,8 @@ urlpatterns = [
     path('validar_registro/', validar_registro, name='validar_registro'),
     path('auth/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('auth/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('user/level/', user_level_api, name='user_level_api'),
+    path('notifications/count/', notifications_count_api, name='notifications_count_api'),
+    path('notifications/<int:notification_id>/read/', mark_notification_read_api, name='mark_notification_read_api'),
     path('', include(router.urls)),
 ]
